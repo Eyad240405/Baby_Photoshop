@@ -513,22 +513,379 @@ void Detect_Image_Edges(Image& image , string& filename2){
     image.saveImage(filename2);
 }
 
+void inverted(Image& image , string& filename2 ){
+    for(int i = 0 ; i < image.width ; i++){
+        for(int j = 0 ; j < image.height ; j++){
+
+            unsigned int avg = 0 ;
+            for(int k = 0 ; k < image.channels ; k++){
+                image(i,j,k)=255 - image(i,j,k) ;
+            }
+        }
+    }
+    image.saveImage(filename2);
+}
+void Rotate(Image& image,string& filename,string& filename2){
+    int n;
+    cout << "Rotation by:\n" << "1) 90\n" << "2) 180\n" << "3) 270\n" << "Choose[1 , 2 , 3]:";
+    cin >> n;
+    // Rotate 90 degrees
+    if(n == 1){
+        Image image2(image.height,image.width);
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = 0; j < image.height; ++j) {
+                for (int k = 0; k < image.channels; ++k) {
+                    image2(image.height-j-1, i, k) = image(i, j, k);
+                }
+            }
+        }
+        image2.saveImage(filename2);
+    }
+    // Rotate 180 degrees
+    if(n == 2) {
+        Image image2(image.height,image.width);
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = 0; j < image.height; ++j) {
+                for (int k = 0; k < image.channels; ++k) {
+                    image2(image.height - j-1,image.width - i-1, k)=image(i, j, k);
+                }
+            }
+        }
+        Image image3(image2.height,image2.width);
+        for (int i = 0; i < image2.width; ++i) {
+            for (int j = 0; j < image2.height; ++j) {
+                for (int k = 0; k < image2.channels; ++k) {
+                    image3(image2.height-j-1, i, k) = image2(i, j, k);
+                }
+            }
+        }
+        image3.saveImage(filename2);
+    }
+    // Rotate 270 degrees
+    if(n == 3){
+        Image image2(image.height,image.width);
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = 0; j < image.height; ++j) {
+                for (int k = 0; k < image.channels; ++k) {
+                    image2(j,image.width-i-1, k)=image(i, j, k);
+                }
+            }
+        }
+        image2.saveImage(filename2);
+    }
+}
+int calculate_division_factor(int width, int height) {
+    return min(width, height) / 4;
+}
+void Simple_Frame(Image& image,string& filename2, const string color) {
+    int division_factor = calculate_division_factor(image.width, image.height);
+    int frameWidth = min(image.width, image.height) / 20;
+    int frame_startPoint_1 = image.width / division_factor;
+    int frame_startPoint_2 = image.height / division_factor;
+
+    for (int j = 0; j < image.height; ++j) {
+        for (int i = 0; i < frameWidth + frame_startPoint_2 / 6; ++i) {
+            if (color == "1") {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 0;
+                image(image.width - 1 - i, j, 0) = image(image.width - 1 - i, j, 1) = image(image.width - 1 - i, j, 2) = 0;
+            } else if (color == "2") {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 255;
+                image(image.width - 1 - i, j, 0) = image(image.width - 1 - i, j, 1) = image(image.width - 1 - i, j, 2) = 255;
+            }else if (color == "3") {
+                image(i, j, 0) = 255;
+                image(i, j, 1) = 0;
+                image(i, j, 2) = 0;
+                image(image.width - 1 - i, j, 0) = 255;
+                image(image.width - 1 - i, j, 1) = 0;
+                image(image.width - 1 - i, j, 2) = 0;
+            }
+            else if (color == "4") {
+                image(i, j, 0) = 0;
+                image(i, j, 1) = 255;
+                image(i, j, 2) = 0;
+                image(image.width - 1 - i, j, 0) = 0;
+                image(image.width - 1 - i, j, 1) = 255;
+                image(image.width - 1 - i, j, 2) = 0;
+            }
+            else if (color == "5") {
+                image(i, j, 0) = 0;
+                image(i, j, 1) = 0;
+                image(i, j, 2) = 255;
+                image(image.width - 1 - i, j, 0) = 0;
+                image(image.width - 1 - i, j, 1) = 0;
+                image(image.width - 1 - i, j, 2) = 255;
+            }
+            else if (color == "6") {
+                image(i, j, 0) = 255;
+                image(i, j, 1) = 255;
+                image(i, j, 2) = 0;
+                image(image.width - 1 - i, j, 0) = 255;
+                image(image.width - 1 - i, j, 1) = 255;
+                image(image.width - 1 - i, j, 2) = 0;
+            }
+            else if (color == "7") {
+                image(i, j, 0) = 160;
+                image(i, j, 1) = 32;
+                image(i, j, 2) = 240;
+                image(image.width - 1 - i, j, 0) = 160;
+                image(image.width - 1 - i, j, 1) = 32;
+                image(image.width - 1 - i, j, 2) = 240;
+            }
+        }
+    }
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < frameWidth + frame_startPoint_1 / 6; ++j) {
+            if (color == "1") {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 0;
+                image(i, image.height - 1 - j, 0) = image(i, image.height - 1 - j, 1) = image(i, image.height - 1 - j, 2) = 0;
+            }  else if (color == "2") {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 255;
+                image(i, image.height - 1 - j, 0) = image(i, image.height - 1 - j, 1) = image(i, image.height - 1 - j, 2) = 255;
+            }else if (color == "3") {
+                image(i, j, 0) = 255;
+                image(i, j, 1) = 0;
+                image(i, j, 2) = 0;
+                image(i, image.height - 1 - j, 0) = 255;
+                image(i, image.height - 1 - j, 1) = 0;
+                image(i, image.height - 1 - j, 2) = 0;
+            }
+            else if (color == "4") {
+                image(i, j, 0) = 0;
+                image(i, j, 1) = 255;
+                image(i, j, 2) = 0;
+                image(i, image.height - 1 - j, 0) = 0;
+                image(i, image.height - 1 - j, 1) = 255;
+                image(i, image.height - 1 - j, 2) = 0;
+            }
+            else if (color == "5") {
+                image(i, j, 0) = 0;
+                image(i, j, 1) = 0;
+                image(i, j, 2) = 255;
+                image(i, image.height - 1 - j, 0) = 0;
+                image(i, image.height - 1 - j, 1) = 0;
+                image(i, image.height - 1 - j, 2) = 255;
+            }
+            else if (color == "6") {
+                image(i, j, 0) = 255;
+                image(i, j, 1) = 255;
+                image(i, j, 2) = 0;
+                image(i, image.height - 1 - j, 0) = 255;
+                image(i, image.height - 1 - j, 1) = 255;
+                image(i, image.height - 1 - j, 2) = 0;
+            }
+            else if (color == "7") {
+                image(i, j, 0) = 160;
+                image(i, j, 1) = 32;
+                image(i, j, 2) = 240;
+                image(i, image.height - 1 - j, 0) = 160;
+                image(i, image.height - 1 - j, 1) = 32;
+                image(i, image.height - 1 - j, 2) = 240;
+            }
+        }
+    }
+    image.saveImage(filename2);    
+}
+void Fancy_Frame(Image& image, string& filename2,const string& color) {
+    int frameSize_factor_1 = max(1, image.width / 1900);
+    int frameSize_factor_2 = max(1, image.height / 1900);
+    int frameWidth = min(image.width, image.height) / 80;
+    int frame_startPoint_1 = image.width / (4 * frameSize_factor_1);
+    int frame_startPoint_2 = image.height / (4 * frameSize_factor_2);
+
+    if(image.width<1000 && image.height<1000){
+
+        // Apply frame color to the top and bottom borders
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = frame_startPoint_2/3.9; j < frame_startPoint_2/3.9 + frameWidth; ++j) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 255; // Assuming 'white' color
+                image(i, image.height - 1 - j, 0) = image(i, image.height - 1 - j, 1) = image(i, image.height - 1 - j, 2) = 255;
+            }
+        }
+        // Apply frame color to the top and bottom borders inside the frame
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = frame_startPoint_2/3; j < frame_startPoint_2/3 + frameWidth; ++j) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 128; // Assuming 'gray' color
+                image(i, image.height - 1 - j, 0) = image(i, image.height - 1 - j, 1) = image(i, image.height - 1 - j, 2) = 128;
+            }
+        }
+        // Apply frame color to the left and right borders
+        for (int j = 0; j < image.height; ++j) {
+            for (int i = frame_startPoint_1/3.5; i < frame_startPoint_1/3.5 + frameWidth; ++i) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 255;
+                image(image.width - 1 - i, j, 0) = image(image.width - 1 - i, j, 1) = image(image.width - 1 - i, j, 2) = 255;
+            }
+        }
+        // Apply frame color to the left and right borders inside the frame
+        for (int j = 0; j < image.height; ++j) {
+            for (int i = frame_startPoint_1 / 2.7; i < frame_startPoint_1 / 2.7 + frameWidth; ++i) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 128;
+                image(image.width - 1 - i, j, 0) = image(image.width - 1 - i, j, 1) = image(image.width - 1 - i, j, 2) = 128;
+            }
+        }
+    }
+    else if(image.width>1000 && image.height>1000){
+        // Apply frame color to the top and bottom borders
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = frame_startPoint_2/4; j < frame_startPoint_2/4 + frameWidth; ++j) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 255; // Assuming 'white' color
+                image(i, image.height - 1 - j, 0) = image(i, image.height - 1 - j, 1) = image(i, image.height - 1 - j, 2) = 255;
+            }
+        }
+        // Apply frame color to the top and bottom borders inside the frame
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = frame_startPoint_2/3.1; j < frame_startPoint_2/3.1 + frameWidth; ++j) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 128; // Assuming 'gray' color
+                image(i, image.height - 1 - j, 0) = image(i, image.height - 1 - j, 1) = image(i, image.height - 1 - j, 2) = 128;
+            }
+        }
+        // Apply frame color to the left and right borders
+        for (int j = 0; j < image.height; ++j) {
+            for (int i = frame_startPoint_1/3.1; i < frame_startPoint_1/3.1 + frameWidth; ++i) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 255;
+                image(image.width - 1 - i, j, 0) = image(image.width - 1 - i, j, 1) = image(image.width - 1 - i, j, 2) = 255;
+            }
+        }
+        // Apply frame color to the left and right borders inside the frame
+        for (int j = 0; j < image.height; ++j) {
+            for (int i = frame_startPoint_1 / 2.3; i < frame_startPoint_1 / 2.3 + frameWidth; ++i) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 128;
+                image(image.width - 1 - i, j, 0) = image(image.width - 1 - i, j, 1) = image(image.width - 1 - i, j, 2) = 128;
+            }
+        }
+    }
+    else{
+        // Apply frame color to the top and bottom borders
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = frame_startPoint_2/3.3; j < frame_startPoint_2/3.3 + frameWidth; ++j) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 255; // Assuming 'white' color
+                image(i, image.height - 1 - j, 0) = image(i, image.height - 1 - j, 1) = image(i, image.height - 1 - j, 2) = 255;
+            }
+        }
+        // Apply frame color to the top and bottom borders inside the frame
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = frame_startPoint_2/2.5; j < frame_startPoint_2/2.5 + frameWidth; ++j) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 128; // Assuming 'gray' color
+                image(i, image.height - 1 - j, 0) = image(i, image.height - 1 - j, 1) = image(i, image.height - 1 - j, 2) = 128;
+            }
+        }
+        // Apply frame color to the left and right borders
+        for (int j = 0; j < image.height; ++j) {
+            for (int i = frame_startPoint_1/6; i < frame_startPoint_1/6 + frameWidth; ++i) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 255;
+                image(image.width - 1 - i, j, 0) = image(image.width - 1 - i, j, 1) = image(image.width - 1 - i, j, 2) = 255;
+            }
+        }
+        // Apply frame color to the left and right borders inside the frame
+        for (int j = 0; j < image.height; ++j) {
+            for (int i = frame_startPoint_1 / 4.7; i < frame_startPoint_1 / 4.7 + frameWidth; ++i) {
+                image(i, j, 0) = image(i, j, 1) = image(i, j, 2) = 128;
+                image(image.width - 1 - i, j, 0) = image(image.width - 1 - i, j, 1) = image(image.width - 1 - i, j, 2) = 128;
+            }
+        }
+    }
+    image.saveImage(filename2);
+}
+int Pixel(Image& image, int col, int row, int k, int width, int height) {
+    int sum = 0;
+    int sumKernel = 0;
+    int kernelSize = 35; // We can adjust the kernel to apply different blur levels
 
 
+    for (int j = -kernelSize/2; j <= kernelSize/2; j++) {
+        for (int i = -kernelSize/2; i <= kernelSize/2; i++) {
+            if ((row + j) >= 0 && (row + j) < height && (col + i) >= 0 && (col + i) < width) {
+                int color = image.getPixel(col + i, row + j, k);
+
+                sum += color;
+                sumKernel++;
+            }
+        }
+    }
+    return sum / sumKernel;
+}
+void Blur(Image& image, Image& result) {
+    for (int row = 0; row < image.height; row++) {
+        for (int col = 0; col < image.width; col++) {
+            for (int k = 0; k < 3; k++) {
+                result.setPixel(col, row, k, Pixel(image, col, row, k, image.width, image.height));
+            }
+        }
+    }
+}
+void sunlight(Image& image, string& filename2){
+    Image photo(image.width, image.height);
+    for (int i = 0; i < image.width; i++) {
+        for (int j = 0; j < image.height; j++) 
+        {
+            photo(i, j, 0) = image(i, j, 0);
+            photo(i, j, 1) = image(i, j, 1);
+            photo(i, j, 2) = image(i, j, 2);
 
 
+            photo(i, j, 0) = min(photo(i, j, 0) + 30, 255);
+            photo(i, j, 1) = min(photo(i, j, 1) + 20, 255);
+            photo(i, j, 2) = max(photo(i, j, 2) - 50, 0);
+        }
+    }
+    photo.saveImage(filename2);
+}
+void sepia(Image& image, string& filename2){
+    Image image2(image.width,image.height);
+    for (int i = 0; i < image.width; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            int r =image(i, j, 0);
+            int g =image(i, j, 1);
+            int b =image(i, j, 2);
 
+            int sepia_r = (r*0.393)+(g*0.769)+(b*0.189);
+            int sepia_g = (r*0.349)+(g*0.686)+(b*0.168);
+            int sepia_b = (r*0.272)+(g*0.534)+(b*0.131);
 
+            sepia_r = min(255, max(0, sepia_r));
+            sepia_g = min(255, max(0, sepia_g));
+            sepia_b = min(255, max(0, sepia_b));
 
+            image2(i,j,0)= sepia_r;
+            image2(i,j,1)= sepia_g;
+            image2(i,j,2)= sepia_b;
 
+        }
+    }
+    image2.saveImage(filename2);
+}
 
+void emboss(Image& image, string& filename2){
+    Image image2(image.width,image.height);
+    // Define the embossing kernel
+    int embossKernel[3][3] = {{-2, -1, 0},
+                               {-1,  1, 1},
+                               { 0,  1, 2}};
+                               
+    // Iterate over each pixel and apply stamp-like embossing effect
+    for (int y = 1; y < image.height - 1; ++y) {
+        for (int x = 1; x < image.width - 1; ++x) {
+            int embossValue = 0;
 
+            // Convolve image with the embossing kernel
+            for (int j = -1; j <= 1; ++j) {
+                for (int i = -1; i <= 1; ++i) {
+                    embossValue += image(x + i, y + j, 0) * embossKernel[j + 1][i + 1];
+                }
+            }
 
+            // Add intensity and clamp emboss value to the range [0, 255]
+            embossValue = min(max(embossValue +128, 0), 255);
 
+            
 
-
-
-
+            // Set the pixels to the new values
+            image2(x, y, 0) = embossValue;
+            image2(x, y, 1) = embossValue;
+            image2(x, y, 2) = embossValue;
+        }
+    }
+    image2.saveImage(filename2);
+}
 
 int main() {
     Image check;
@@ -622,8 +979,8 @@ int main() {
                  << "16) Purple filter" << endl
                  << "17) Infrared filter" << endl
                  << "18) Skewing filter" << endl
-                 << "19) Extra #1 filter" << endl
-                 << "20) Extra #2 filter" << endl<<endl
+                 << "19) Sepia filter" << endl
+                 << "20) Emboss filter" << endl<<endl
                  << "Please choose a number between 1 and 20."
                  <<endl;
 
@@ -667,7 +1024,38 @@ int main() {
                 cropping(image, filename2);
                 cout << endl;
             } else if (choice == "9") {
-
+                int x = 0;
+                while (x == 0) {
+                    cout << "What frame do you want to add to your photo" << endl;
+                    cout << "1- simple frame" << endl;
+                    cout << "2- fancy frame" << endl;
+                    string choice;
+                    cin >> choice;
+                    string color;
+                    if (choice == "1" || choice == "2") {
+                        int y = 0;
+                        while (y == 0) {
+                            cout << "Choose a color for the frame:\n";
+                            cout << "1. Black\n2. White\n3. Red\n4. Green\n5. Blue\n6. Yellow\n7. Purple\n";
+                            cout << "Which color do you want: ";
+                            cin >> color;
+                            if (color == "1" || color == "2" || color == "3" || color == "4" || color == "5" || color == "6" || color == "7") {
+                                if (choice == "1") Simple_Frame(image,filename2, color);
+                                else {
+                                    Fancy_Frame(image,filename2, color);
+                                    Simple_Frame(image,filename2, color);
+                                }
+                                y = 1;
+                            } else {
+                                cout << "Invalid color choice. Please choose again." << endl;
+                                y = 0;
+                            }
+                        }
+                        x = 1;
+                    } else {
+                        cout << "Invalid choice. Please choose again." << endl;
+                    }
+                }
                 cout << endl;
             } else if (choice == "10") {
                 Detect_Image_Edges(image, filename2);
@@ -697,10 +1085,10 @@ int main() {
                 cout << endl;
             }
             else if (choice == "19") {
-
+                sepia(image, filename2);
                 cout << endl;
             } else if (choice == "20") {
-
+                emboss(image, filename);
                 cout << endl;
             }
         }
