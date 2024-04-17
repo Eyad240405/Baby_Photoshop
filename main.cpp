@@ -11,6 +11,267 @@
 #include <ctype.h>
 #include "Image_Class.h"
 using namespace std;
+void Black_White(Image& image , string& filename2){
+    greyscale( image , filename2);
+    for(int i = 0 ; i < image.width ; i++){
+        for(int j = 0  ; j < image.height ; j++){
+            for(int k = 0 ; k < image.channels ; k++){
+                if(image(i,j,k)>=128) {
+                    image(i, j, k) = 255;
+                }
+                else{
+                    image(i, j, k) = 0;
+                }
+            }
+        }
+    }
+    image.saveImage(filename2);
+}
+void flipping(Image& image,string& filename,string& filename2) {
+    Image image2(filename);
+    Image image3(filename);
+    cout << endl << "1) Vertical flip" << endl
+         << "2) Horizontal flip" << endl
+         <<"Choose:";
+    string s;
+    cin>>s;
+
+
+//  Vertical flip
+    if(s=="1") {
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = 0; j < image.height / 2; ++j) {
+                for (int k = 0; k < image.channels; ++k) {
+                    image2(i, j, k) = image(i, image.height / 2 - j, k);
+                    image3(i, j, k) = image(i, image.height - 1 - j, k);
+
+
+                }
+            }
+        }
+        for (int i = 0; i < image.width; ++i) {
+            for (int j = 0; j < image.height / 2; ++j) {
+                for (int k = 0; k < image.channels; ++k) {
+                    image(i, j, k) = image3(i, j, k);
+                    image(i, j + image.height / 2, k) = image2(i, j, k);
+                }
+            }
+        }
+    }
+//Horizontal flip
+    else if(s=="2") {
+        for (int i = 0; i < image.width / 2; ++i) {
+            for (int j = 0; j < image.height; ++j) {
+                for (int k = 0; k < image.channels; ++k) {
+                    image2(i, j, k) = image(image.width / 2 - i, j, k);
+                    image3(i, j, k) = image(image.width - 1 - i, j, k);
+
+
+                }
+            }
+        }
+        for (int i = 0; i < image.width / 2; ++i) {
+            for (int j = 0; j < image.height; ++j) {
+                for (int k = 0; k < image.channels; ++k) {
+                    image(i, j, k) = image3(i, j, k);
+                    image(i + image.width / 2, j, k) = image2(i, j, k);
+                }
+            }
+        }
+    }
+
+
+    image.saveImage(filename2);
+}
+void repair_crop(int D , int& sd , int& d , int y , int y2){
+    while (D-sd < d){
+        int s;
+        cout<<"1) Manually change the starting point."<<endl<<"2) Manually change the dimensions. "<<endl<<"3) Apply recommended changes."<<endl<<"Choose:";
+        cin>>s;
+
+        if(s==1){
+            cout<<endl<<"Enter the new starting point:";
+            cin>>sd;
+        }
+        else if(s==2){
+            cout<<endl<<"Enter the new dimension:";
+            cin>>d;
+            while (d==0){
+                cout<<endl<<"Enter the new dimension:";
+                cin>>d;
+            }
+        }
+        else if(s==3){
+            cout<<"1) Automatically change the starting point to ("<<D - d <<" , "<<y<<")"<<endl
+                <<"2) Automatically change the dimensions to ("<<D -sd<<"x"<<y2<<")"<<endl<<"Choose:";
+            int z;
+            cin>>z;
+            if(z==1){
+                sd=D - d;
+            }
+            else if (z==2){
+                d=D -sd;
+            }
+        }
+    }
+}
+void repair_crop2(int D1 , int D2 , int& sd1 , int& sd2 , int& d1 , int& d2 ){
+    while (D1-sd1 < d1 || D2-sd2 < d2){
+        int s;
+        cout<<"1) Manually change the starting point."<<endl<<"2) Manually change the dimensions. "<<endl<<"3) Apply recommended changes."<<endl<<"Choose:";
+        cin>>s;
+
+        if(s==1){
+            cout<<endl<<"Enter the new starting points:";
+            cin>>sd1>>sd2;
+        }
+        else if(s==2){
+            cout<<endl<<"Enter the new dimensions:";
+            cin>>d1>>d2;
+            while (d1==0 || d2==0){
+                cout<<endl<<"Enter the new dimensions:";
+                cin>>d1>>d2;
+            }
+        }
+        else if(s==3){
+            cout<<"1) Automatically change the starting point to ("<<D1 - d1<<" , "<<D2 - d2 <<")"<<endl
+            <<"2) Automatically change the dimensions to ("<<D1 -sd1<<"x"<<D2 -sd2<<")"<<endl<<"Choose:";
+            int z;
+            cin>>z;
+            if(z==1){
+                sd1=D1 - d1 ;
+                sd2=D2 - d2 ;
+            }
+            else if (z==2){
+                d1=D1 -sd1 ;
+                d2=D2 -sd2 ;
+            }
+        }
+    }
+}
+
+void cropping(Image& image,string& filename2){
+    cout<<"Dimensions:"<<image.width<<" "<<image.height<<endl;
+
+    int n , b , w , h;
+    cout << "Enter the start point:" ;
+    cin >> n >> b;
+
+    while (n >= image.width || h >= image.height){
+        cout << "Enter the start point:" ;
+        cin >> n >> b;
+    }
+
+    cout<<endl << "Enter the dimensions:" ;
+    cin >> w >> h;
+    if(image.width-n < w && image.height-b < h ){
+        repair_crop2(image.width , image.height ,  n , b , w , h );
+    }
+
+    else if (image.height - b < h){
+        repair_crop(image.height , b , h , n , w);
+    }
+
+    else if(image.width - n < w){
+        repair_crop(image.width , n , w , b , h);
+    }
+
+    Image image2(w,h);
+    for(int i = n ; i < n+w ; ++i){
+        for(int j = b ; j < b+h ; ++j){
+            for(int k = 0 ; k < image.channels ; ++k){
+                image2(i-n,j-b,k) = image(i,j,k);
+            }
+        }
+    }
+    image2.saveImage(filename2);
+}
+void resize(Image& image , string& filename2){
+    cout<<"Dimensions:"<<image.width<<" "<<image.height<<endl;
+
+    int w , h ;
+    float fw , fh;
+    cout<<endl << "Enter the dimensions:" ;
+    cin >> w >> h;
+    fw= float (image.width ) / w;
+    fh= float (image.height ) / h;
+    cout<<endl<<fw<<endl<<fh<<endl;
+
+    Image image2(w,h);
+    int a , b;
+    for(int i = 0 ; i < w ; i++){
+        for(int j = 0 ; j < h ; j++){
+            for(int k = 0 ; k < image.channels ; ++k){
+                a = round (fw * i);
+                b = round (fh * j);
+                image2(i,j,k) = image(a,b,k);
+            }
+        }
+    }
+    image2.saveImage(filename2);
+}
+void oil(Image& image,string& filename,string& filename2){
+    Image image2(filename);
+    int radius;
+    cout << "Enter the radius:";
+    cin >> radius;
+    int intestylevel;
+    cout << "Enter the intensity:";
+    cin >> intestylevel;
+
+    int maxindex = 0;
+    for(int i = radius ; i < image.width-radius ; i++){
+        for(int j = radius ; j < image.height-radius ; j++){
+            int curmax = 0;
+            int l = 0;
+            int avgR[intestylevel]={0};
+            int avgG[intestylevel]={0};
+            int avgB[intestylevel]={0};
+            int count[intestylevel]={0};
+            for(int i_O = i-radius ; i_O < i ; ++i_O){
+                for(int j_O = j-radius ; j_O < j ; ++j_O){
+                    int R = image(i_O,j_O,0);
+                    int G = image(i_O,j_O,1);
+                    int B = image(i_O,j_O,2);
+                    int curintensity = int(round(double((double(R + G + B)/3.0)*intestylevel)/255.0f));
+                    count[curintensity]++;
+                    avgR[curintensity]+=R;
+                    avgG[curintensity]+=G;
+                    avgB[curintensity]+=B;
+                    if(curintensity > l){
+                        l=curintensity;
+
+                    }
+                }
+            }
+            for(int n = 0 ; n <= l ; n++){
+                if(count[n] > curmax){
+                    curmax = count[n];
+                    maxindex = n;
+                }
+            }
+            int fR = min(255,max(0,int(round(double(double(avgR[maxindex])/curmax)))));
+            if (fR >255)
+                fR = 255;
+            else if (fR < 0)
+                fR = 0;
+            int fG = min(255,max(0,int(round(double(double(avgG[maxindex])/curmax)))));
+            if (fG >255)
+                fG = 255;
+            else if (fG < 0)
+                fG = 0;
+            int fB = min(255,max(0,int(round(double(double(avgB[maxindex])/curmax)))));
+            if (fB >255)
+                fB = 255;
+            else if (fB < 0)
+                fB = 0;
+            image2(i,j,0) = fR;
+            image2(i,j,1) = fG;
+            image2(i,j,2) = fB;
+        }
+    }
+    image2.saveImage(filename2);
+}
 int main() {
     Image check;
     Image image;
