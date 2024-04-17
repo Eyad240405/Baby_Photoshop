@@ -272,6 +272,264 @@ void oil(Image& image,string& filename,string& filename2){
     }
     image2.saveImage(filename2);
 }
+
+
+
+
+
+
+
+
+void greyscale(Image& image , string& filename2){
+    for(int i = 0 ; i < image.width ; i++){
+        for(int j = 0  ; j < image.height ; j++){
+
+            unsigned int avg = 0 ;
+            for(int k = 0 ; k < image.channels ; k++){
+                avg += image(i,j,k);
+            }
+
+            avg = avg / 3;
+            for(int k = 0 ; k < image.channels ; k++){
+                image(i,j,k)=avg;
+            }
+        }
+    }
+    image.saveImage(filename2);
+}
+
+void fixed_cropping(Image& image,string& filename2 , int w , int h){
+
+    Image image_n(w,h);
+    for(int i = 0 ; i < w ; ++i){
+        for(int j = 0 ; j < h ; ++j){
+            for(int k = 0 ; k < image.channels ; ++k){
+                image_n(i,j,k) = image(i,j,k);
+            }
+        }
+    }
+    image_n.saveImage(filename2);
+}
+
+void resize_merge(Image& image , string& filename2 , int w , int h ){
+
+    float fw , fh;
+    fw= float (image.width ) / w;
+    fh= float (image.height ) / h;
+
+    Image image3(w,h);
+    int a , b;
+    for(int i = 0 ; i < w ; i++){
+        for(int j = 0 ; j < h ; j++){
+            for(int k = 0 ; k < image.channels ; ++k){
+                a = round (fw * i);
+                b = round (fh * j);
+                image3(i,j,k) = image(a,b,k);
+            }
+        }
+    }
+    image3.saveImage(filename2);
+}
+
+void merge(Image& image,string& filename, string& filename2) {
+    string f_l2 ;
+    string o1="m1.jpg" , o2="m2.jpg";
+    Image image2;
+    cout <<endl <<"Please provide the desired input file name."<<endl
+         <<"With its extension (jpg / jpeg / png / bmp)"<<endl<<"Enter:";
+    cin>>f_l2;
+    while(true){
+        try {
+            image2.loadNewImage(f_l2);
+            break;
+        }
+        catch( invalid_argument) {
+            cout << "Please enter a valid photo \n" << endl;
+            cin>>f_l2;
+        }
+    }
+
+    if (image2.loadNewImage(f_l2)) {
+        cout << "Loaded Successfully!" << endl;
+    }
+    int x , y;
+    string ch="3";
+    while(ch!="1" && ch!="2"){
+        cout<<endl<<"1) Resize to fit"<<endl<<"2) Merge the common area"<<endl<<"Choose:";
+        cin>>ch;
+    }
+    if(ch=="1") {
+        x = max(image.width, image2.width);
+        y = max(image.height, image2.height);
+
+        resize_merge(image, o1, x, y);
+
+        resize_merge(image2, o2, x, y);
+    }
+    else if(ch=="2"){
+        x = min(image.width, image2.width);
+        y = min(image.height, image2.height);
+
+        fixed_cropping(image, o1, x, y);
+
+        fixed_cropping(image2, o2, x, y);
+
+    }
+    image.loadNewImage(o1);
+    image2.loadNewImage(o2);
+
+    Image image4(x,y);
+    //fixed_cropping(image2 , filename2 , image2.width , image2.height);
+    for (int i = 0; i < x ; ++i) {
+        for (int j = 0; j < y ; ++j) {
+            for (int k = 0; k < image.channels; ++k) {
+                image4(i, j, k) = ((image(i,j, k)) + (image2(i,j, k)) ) / 2;
+            }
+        }
+    }
+    image4.saveImage(filename2);
+}
+
+void Darken_and_Lighten_Image(Image& image , string& filename2){
+    string s;
+    cout<<endl<<"1) Darker by 50%"<<endl<<"2) Lighter by 50%"<<endl<<"Choose:";
+    cin>>s;
+    for(int i = 0 ; i < image.width ; i++){
+        for(int j = 0  ; j < image.height ; j++){
+            for(int k = 0 ; k < image.channels ; k++){
+                if(s=="1"){image(i,j,k)=(image(i,j,k))*1/2;}
+                else if(s=="2"){
+                    if((image(i,j,k))*1.5>=255){
+                        image(i,j,k)=255;
+                    }
+                    else{
+                        image(i,j,k)=(image(i,j,k))*1.5;
+                    }
+                }
+            }
+        }
+    }
+    image.saveImage(filename2);
+}
+
+void V_flip(Image& image,string& filename,string& filename2) {
+    Image image2(filename);
+    Image image3(filename);
+
+    for (int i = 0; i < image.width / 2; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            for (int k = 0; k < image.channels; ++k) {
+                image2(i, j, k) = image(image.width / 2 - i, j, k);
+                image3(i, j, k) = image(image.width - 1 - i, j, k);
+
+
+            }
+        }
+    }
+    for (int i = 0; i < image.width / 2; ++i) {
+        for (int j = 0; j < image.height; ++j) {
+            for (int k = 0; k < image.channels; ++k) {
+                image(i, j, k) = image3(i, j, k);
+                image(i + image.width / 2, j, k) = image2(i, j, k);
+            }
+        }
+    }
+    image.saveImage(filename2);
+}
+
+
+
+void Purple(Image& image , string& filename2 ){
+    double y = 0.6 ;
+    for(int i = 0 ; i < image.width ; i++){
+        for(int j = 0 ; j < image.height ; j++){
+            if((image(i,j,1) * y)<0){image(i,j,1)=0;}
+            else {image(i,j,1)*=y;}
+        }
+    }
+    image.saveImage(filename2);
+}
+
+void retro(Image& image , string& filename2 ){
+    srand(static_cast<unsigned int>(time(0)));
+
+    for(int i = 0 ; i < image.width ; i++){
+        for(int j = 0 ; j < image.height ; j++){
+            for(int k = 0 ; k < 3 ; k ++) {
+                int intensity = 50;
+                int noise_value = rand() % (intensity * 2 + 1) - intensity;
+                image(i, j, k) = (((0.88) * image(i, j, k)) + (0.33) * noise_value);
+            }
+        }
+    }
+    image.saveImage(filename2);
+
+    for(int i = 0 ; i < image.width ; i++) {
+        for (int j = 0; j < image.height; j++) {
+            for(int k = 0 ; k < 3 ; k++) {
+                if (j % 2 == 0) {
+                    image(i,j,k)*=0.5;
+                }
+            }
+        }
+    }
+
+
+    image.saveImage(filename2);
+}
+
+void Infrared(Image& image , string& filename2){
+    greyscale(image , filename2);
+    for(int i = 0 ; i < image.width ; i++){
+        for(int j = 0 ; j < image.height ; j++){
+            image(i,j,0)=0;
+            //image(i,j,1)=128;
+            //image(i,j,2)=128;
+        }
+    }
+    image.saveImage(filename2);
+    inverted(image , filename2);
+}
+
+void Detect_Image_Edges(Image& image , string& filename2){
+    //greyscale(image , filename2);
+    for(int i = 1 ; i < image.width-1 ; i++){
+        for(int j = 1  ; j < image.height-1 ; j++) {
+            unsigned int avg = 0 ;
+            for(int k = 0 ; k < 3 ; k++) {
+                if ((abs(image(i, j, k) - image(i, j+1, k)) >= 120
+                || abs(image(i, j, k) - image(i+1, j, k)) >= 120
+                || abs(image(i, j, k) - image(i+1, j+1, k)) >= 120)){
+                    avg = 17 ;
+                }
+                else {avg = 255 ;}
+                image(i,j,0)=avg;
+                image(i,j,1)=avg;
+                image(i,j,2)=avg;
+            }
+        }
+
+    }
+    image.saveImage(filename2);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int main() {
     Image check;
     Image image;
