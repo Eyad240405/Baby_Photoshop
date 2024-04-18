@@ -11,6 +11,24 @@
 #include <ctype.h>
 #include "Image_Class.h"
 using namespace std;
+void greyscale(Image& image , string& filename2){
+    for(int i = 0 ; i < image.width ; i++){
+        for(int j = 0  ; j < image.height ; j++){
+
+            unsigned int avg = 0 ;
+            for(int k = 0 ; k < image.channels ; k++){
+                avg += image(i,j,k);
+            }
+
+            avg = avg / 3;
+            for(int k = 0 ; k < image.channels ; k++){
+                image(i,j,k)=avg;
+            }
+        }
+    }
+    image.saveImage(filename2);
+}
+
 void Black_White(Image& image , string& filename2){
     greyscale( image , filename2);
     for(int i = 0 ; i < image.width ; i++){
@@ -275,28 +293,6 @@ void oil(Image& image,string& filename,string& filename2){
 
 
 
-
-
-
-
-
-void greyscale(Image& image , string& filename2){
-    for(int i = 0 ; i < image.width ; i++){
-        for(int j = 0  ; j < image.height ; j++){
-
-            unsigned int avg = 0 ;
-            for(int k = 0 ; k < image.channels ; k++){
-                avg += image(i,j,k);
-            }
-
-            avg = avg / 3;
-            for(int k = 0 ; k < image.channels ; k++){
-                image(i,j,k)=avg;
-            }
-        }
-    }
-    image.saveImage(filename2);
-}
 
 void fixed_cropping(Image& image,string& filename2 , int w , int h){
 
