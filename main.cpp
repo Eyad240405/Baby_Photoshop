@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include "Image_Class.h"
+#define PI 3.141592654
 using namespace std;
 void greyscale(Image& image , string& filename2){
     for(int i = 0 ; i < image.width ; i++){
@@ -883,6 +884,50 @@ void emboss(Image& image, string& filename2){
     }
     image2.saveImage(filename2);
 }
+void Skew(Image& image  , string& filename , string& filename2){
+    float w=0 , h=0 , angle=0;
+
+    cout<<endl<<"Enter the angle:";
+    cin >> angle;
+
+    double rad = (angle * PI )/ 180.0;
+    int W = image.width , H = image.height;
+    h = abs(H * float(sin((angle*PI)/180)));
+    w= ceil (abs(H * float (cos(((angle)*PI)/180))));
+    Image image2(w + image.width , h);
+    int wn = w + image.width;
+    for ( int i = 0 ; i < image2.width ; i++){
+        for( int j = 0 ; j < image2.height ; j++ ){
+            for (int k = 0 ; k < 3 ; k++){
+                image2(i , j , k)=255;
+            }
+        }
+    }
+    for ( int i=0 ; i < image2.width ; i++) {
+        for (int j = 0  ; j < image2.height  ; j++) {
+            for (int k = 0; k < 3; k++) {
+                if ((j-(i*tan(rad))) <= 0 && ((i-image.width)*tan(rad)) < j ) {
+                    image2(i, j, k) = image(i - (j / tan(rad)),  (j * H / h), k);
+                }
+            }
+        }
+    }
+    Image image3(image2.width,image2.height);
+    for (int i = 0; i < image2.width; i++)
+    {
+        for (int j = 0; j < image2.height; j++)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                image3(image2.width-i-1,j,k) = image2(i,j,k);
+            }
+        }
+    }
+
+    image3.saveImage(filename2);
+
+
+}
 int main() {
     Image check;
     Image image;
@@ -1079,8 +1124,10 @@ int main() {
             } else if (choice == "17") {
                 Infrared(image, filename2);
                 cout << endl;
-            }
-            else if (choice == "19") {
+            }else if (choice == "18") {
+                Skew(image,filename,filename2);
+                cout << endl;
+            }else if (choice == "19") {
                 sepia(image, filename2);
                 cout << endl;
             } else if (choice == "20") {
