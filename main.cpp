@@ -852,11 +852,14 @@ void sepia(Image& image, string& filename2){
 
 void emboss(Image& image, string& filename2){
     Image image2(image.width,image.height);
+    
     // Define the embossing kernel
-    int embossKernel[3][3] = {{-2, -1, 0},
-                               {-1,  1, 1},
-                               { 0,  1, 2}};
+    int embossKernel[3][3] = {{-1, 0, 0},
+                               {0,  1, 0},
+                               {0,  0, 0}};
                                
+    int intensity = 128;  // Adjust intensity of embossing effect
+
     // Iterate over each pixel and apply stamp-like embossing effect
     for (int y = 1; y < image.height - 1; ++y) {
         for (int x = 1; x < image.width - 1; ++x) {
@@ -870,9 +873,7 @@ void emboss(Image& image, string& filename2){
             }
 
             // Add intensity and clamp emboss value to the range [0, 255]
-            embossValue = min(max(embossValue +128, 0), 255);
-
-            
+            embossValue = min(max(embossValue + intensity, 0), 255);
 
             // Set the pixels to the new values
             image2(x, y, 0) = embossValue;
@@ -882,7 +883,6 @@ void emboss(Image& image, string& filename2){
     }
     image2.saveImage(filename2);
 }
-
 int main() {
     Image check;
     Image image;
